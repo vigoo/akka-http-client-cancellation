@@ -75,7 +75,8 @@ object Client extends App {
     val guardedResponse = Future.firstCompletedOf(Seq(responseFuture, timeout))
 
     guardedResponse.onComplete {
-      case Success(_) =>
+      case Success(response) =>
+        response.discardEntityBytes()
         println(s"$n: Got response")
       case Failure(reason) =>
         println(s"$n: Failed: $reason")
