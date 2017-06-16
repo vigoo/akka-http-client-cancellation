@@ -10,3 +10,6 @@ Contains a server and a client application with the following behavior:
 The problem is that there is no way (that I could find) in this system to cancel the request in case of the timeout, so  after a very few requests the whole pool gets stuck, full of slow requests waiting for completion.
 
 If we could cancel the request when the timeout occurs, the expected behavior would be that every second request succeeds.
+
+### Note
+There is a `no-connection-pool` branch which works correctly by creating a new outgoing connection for each request and putting an `idleTimeout` on them.
