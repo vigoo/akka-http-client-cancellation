@@ -7,6 +7,7 @@ import akka.pattern.after
 import akka.stream.QueueOfferResult.{Dropped, Enqueued, QueueClosed}
 import akka.stream.{ActorMaterializer, OverflowStrategy, QueueOfferResult, ThrottleMode}
 import akka.stream.scaladsl._
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
@@ -14,10 +15,18 @@ import scala.util.{Failure, Success, Try}
 
 object Client extends App {
 
+  val config =
+    ConfigFactory.parseString(
+      """
+        akka.http.host-connection-pool.client.idle-timeout = 100 millis
+        akka.http.host-connection-pool.client.max-retries = 0
+      """)
+      .withFallback(ConfigFactory.load())
+
   type Pool = Flow[(HttpRequest, (Future[Done], Promise[HttpResponse])), (Try[HttpResponse], (Future[Done], Promise[HttpResponse])), HostConnectionPool]
   type Queue = SourceQueueWithComplete[(HttpRequest, (Future[Done], Promise[HttpResponse]))]
 
-  implicit val actorSystem = ActorSystem("client")
+  implicit val actorSystem = ActorSystem("client", config)
   implicit val executionContext = actorSystem.dispatcher
   implicit val materializer = ActorMaterializer()
 
